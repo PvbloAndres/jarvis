@@ -1,0 +1,80 @@
+# =====================================================================
+#  J.A.R.V.I.S. - configuración
+#  Copia este archivo como config.yaml (instalar.bat lo hace) y rellénalo.
+#  Las líneas que empiezan con # son comentarios.
+# =====================================================================
+
+usuario:
+  nombre: "Pablo"
+  tratamiento: "señor"          # cómo te llama Jarvis
+  ciudad: "Santiago, Chile"     # para el clima; cámbiala por tu ciudad
+
+cerebro:
+  # "claude" (recomendado: el más fiable usando herramientas, ~US$1-5 al mes con uso normal)
+  # "gemini" (gratis con límites; Google puede usar lo que envías para mejorar sus productos)
+  proveedor: "claude"
+  claude_api_key: ""            # https://console.anthropic.com  > API Keys (requiere cargar saldo, mínimo US$5)
+  claude_modelo: "claude-haiku-4-5-20251001"
+  gemini_api_key: ""            # https://aistudio.google.com/apikey
+  gemini_modelo: "gemini-flash-latest"
+  minutos_para_olvidar_conversacion: 20   # tras este silencio empieza una conversación nueva (ahorra dinero)
+  max_tokens_respuesta: 800
+
+voz:
+  activada: true
+  palabra_clave_umbral: 0.5     # sube a 0.6-0.7 si se activa solo; baja a 0.35 si no te escucha
+  voz_tts: "es-CL-LorenzoNeural"   # otras: es-CL-CatalinaNeural, es-MX-JorgeNeural, es-ES-AlvaroNeural
+  velocidad_tts: "+8%"
+  modelo_whisper: "auto"        # auto = "large-v3-turbo" con tarjeta NVIDIA, "small" sin ella. O fija: base, small, medium...
+  dispositivo_whisper: "auto"   # auto | cuda (tarjeta NVIDIA) | cpu
+  microfono: null               # null = el predeterminado; o el número que muestra probar.bat
+  pitido_al_escuchar: true
+  hablar_respuestas_del_panel: true
+
+telegram:
+  activado: false               # ponlo en true cuando tengas el token
+  token: ""                     # te lo da @BotFather en Telegram
+  usuarios_permitidos: []       # tu ID numérico, ej: [123456789]. El bot te lo dice la primera vez que le escribes.
+
+telefono:
+  activado: false               # ponlo en true después de emparejar el OnePlus con adb pair
+  adb_ruta: "adb"               # o la ruta completa, ej: "C:/platform-tools/adb.exe"
+  serie: ""                     # opcional, si tienes varios dispositivos
+  ip: ""                        # opcional, solo si usas el modo "adb tcpip 5555"
+
+alexa:
+  activado: false               # ponlo en true cuando tengas la cuenta de Voice Monkey
+  voicemonkey_token: ""         # console de Voice Monkey > API Tokens
+  parlantes:                    # nombre que tú eliges : ID del "Speaker" en Voice Monkey
+    living: ""
+  parlante_principal: "living"
+  voz_polly: ""                 # opcional: voz de Amazon Polly, ej: "Lupe" o "Mia"
+  idioma: "es-US"
+  responder_por_alexa: true     # si la orden vino desde Alexa, Jarvis contesta por el Echo
+  rutinas:                      # nombre : ID del "Routine Trigger" en Voice Monkey + qué hace en la app Alexa
+    luces_encender:
+      id: ""
+      descripcion: "Enciende las luces del living"
+    luces_apagar:
+      id: ""
+      descripcion: "Apaga todas las luces de la casa"
+
+panel:
+  activado: true
+  puerto: 8765
+  abrir_al_iniciar: true
+  token_api: ""                 # opcional: si lo pones, orden.py y el panel deben enviarlo
+
+pc:
+  apps:                         # atajos propios: "nombre hablado": ruta o URI
+    # "mi juego": "C:/Games/MiJuego/juego.exe"
+  comandos:                     # comandos que Jarvis puede ejecutar por nombre (siempre pide confirmación)
+    ip_publica:
+      descripcion: "Muestra la IP pública del PC"
+      comando: "curl -s https://ifconfig.me"
+    vaciar_papelera:
+      descripcion: "Vacía la papelera de reciclaje"
+      comando: 'powershell -NoProfile -Command "Clear-RecycleBin -Force"'
+
+general:
+  recordatorios_en: ["pc", "telegram"]   # dónde avisar: pc (voz), telegram, alexa

@@ -1,0 +1,3 @@
+# Solo si tienes tarjeta NVIDIA: Whisper usa la GPU (instalar.bat lo instala solo si la detecta)
+nvidia-cublas-cu12
+nvidia-cudnn-cu12==9.*

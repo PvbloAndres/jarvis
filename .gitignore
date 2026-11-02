@@ -1,0 +1,15 @@
+# Configuración privada (claves y datos personales): se crean desde los *.example
+Jarvis/config.yaml
+Jarvis/rutinas.yaml
+Jarvis/triggercmd/commands.json
+.env
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Datos y registros locales
+Jarvis/data/
+*.log

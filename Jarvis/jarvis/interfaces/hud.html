@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>J.A.R.V.I.S.</title>
+<style>
+  :root {
+    --bg: #03070d; --panel: rgba(10, 30, 45, .55); --line: rgba(64, 214, 255, .28);
+    --cyan: #40d6ff; --cyan-soft: rgba(64, 214, 255, .14); --text: #d8f6ff; --muted: #7fb3c4;
+    --amber: #ffb347; --red: #ff5a5a; --green: #5cffb0;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: radial-gradient(ellipse at 50% 30%, #0b2233 0%, var(--bg) 60%) fixed, var(--bg);
+    color: var(--text); font-family: "Segoe UI", system-ui, sans-serif; overflow: hidden;
+  }
+  body::before { /* retícula */
+    content: ""; position: fixed; inset: 0; pointer-events: none; opacity: .35;
+    background-image: linear-gradient(var(--cyan-soft) 1px, transparent 1px),
+                      linear-gradient(90deg, var(--cyan-soft) 1px, transparent 1px);
+    background-size: 48px 48px; mask-image: radial-gradient(circle at 50% 40%, #000 20%, transparent 75%);
+  }
+  header { display: flex; align-items: baseline; gap: 16px; padding: 18px 28px 6px; }
+  header h1 { margin: 0; font-weight: 300; letter-spacing: .5em; font-size: 22px; color: var(--cyan);
+              text-shadow: 0 0 12px rgba(64,214,255,.6); }
+  header .sub { color: var(--muted); font-size: 12px; letter-spacing: .25em; text-transform: uppercase; }
+  header .clock { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--muted); letter-spacing: .15em; }
+  main { display: grid; grid-template-columns: minmax(320px, 1fr) minmax(360px, 1.1fr); gap: 20px;
+         padding: 12px 28px 24px; height: calc(100% - 64px); }
+  .left { display: flex; flex-direction: column; align-items: center; gap: 18px; min-height: 0; }
+  .reactor { position: relative; width: min(38vh, 360px); aspect-ratio: 1; }
+  .reactor svg { width: 100%; height: 100%; overflow: visible; }
+  .ring { fill: none; stroke: var(--cyan); transform-origin: 50% 50%; transform-box: fill-box; }
+  .r1 { stroke-width: 1.5; stroke-dasharray: 3 9; animation: spin 40s linear infinite; opacity: .8; }
+  .r2 { stroke-width: 6; stroke-dasharray: 60 22; animation: spin 18s linear infinite reverse; opacity: .55; }
+  .r3 { stroke-width: 1; opacity: .5; }
+  .r4 { stroke-width: 10; stroke-dasharray: 2 6; animation: spin 26s linear infinite; opacity: .35; }
+  .core { fill: var(--cyan); filter: drop-shadow(0 0 18px var(--cyan)); transform-origin: 50% 50%;
+          transform-box: fill-box; animation: breathe 4s ease-in-out infinite; }
+  .state-label { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none;
+                 font-size: 9.5px; letter-spacing: .18em; text-transform: uppercase; color: #02121b; font-weight: 700; }
+  body.escuchando .core { animation: breathe .7s ease-in-out infinite; }
+  body.escuchando .r2 { animation-duration: 5s; opacity: .9; }
+  body.pensando .ring, body.pensando .core { stroke: var(--amber); }
+  body.pensando .core { fill: var(--amber); filter: drop-shadow(0 0 18px var(--amber)); }
+  body.pensando .r2 { animation-duration: 2.2s; } body.pensando .r1 { animation-duration: 6s; }
+  body.hablando .core { animation: breathe .45s ease-in-out infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes breathe { 50% { transform: scale(.86); opacity: .8; } }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; backdrop-filter: blur(6px); }
+  .status { width: 100%; max-width: 460px; padding: 14px 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; }
+  .status h2, .chat h2 { grid-column: 1 / -1; margin: 0 0 4px; font-size: 11px; letter-spacing: .3em; color: var(--muted);
+                         font-weight: 600; text-transform: uppercase; }
+  .st { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); box-shadow: 0 0 8px currentColor; color: var(--red); flex: none; }
+  .dot.on { background: var(--green); color: var(--green); }
+  .dot.warn { background: var(--amber); color: var(--amber); }
+  .st small { color: var(--muted); display: block; font-size: 11px; }
+  .quick { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; max-width: 460px; }
+  .quick button, .send button { background: transparent; color: var(--cyan); border: 1px solid var(--line);
+    border-radius: 999px; padding: 7px 14px; font: inherit; font-size: 12px; cursor: pointer; letter-spacing: .05em; }
+  .quick button:hover, .send button:hover { background: var(--cyan-soft); border-color: var(--cyan); }
+  .chat { display: flex; flex-direction: column; min-height: 0; padding: 14px 16px; }
+  .log { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 6px 4px 12px; }
+  .msg { max-width: 88%; padding: 9px 13px; border-radius: 10px; line-height: 1.45; font-size: 14px; white-space: pre-wrap; }
+  .msg.usuario { align-self: flex-end; background: rgba(64,214,255,.12); border: 1px solid var(--line); }
+  .msg.jarvis { align-self: flex-start; background: rgba(0,0,0,.35); border: 1px solid rgba(64,214,255,.18); }
+  .msg .meta { display: block; font-size: 10px; letter-spacing: .2em; color: var(--muted); text-transform: uppercase; margin-bottom: 3px; }
+  .sys { align-self: center; font-size: 11px; color: var(--muted); letter-spacing: .05em; }
+  .sys.err { color: var(--red); }
+  .send { display: flex; gap: 8px; border-top: 1px solid var(--line); padding-top: 12px; }
+  .send input { flex: 1; background: rgba(0,0,0,.35); border: 1px solid var(--line); border-radius: 8px; color: var(--text);
+                padding: 10px 12px; font: inherit; font-size: 14px; outline: none; }
+  .send input:focus { border-color: var(--cyan); }
+  .send button.mic.rec { background: var(--red); color: #fff; border-color: var(--red); }
+  @media (max-width: 860px) {
+    body { overflow: auto; }
+    main { grid-template-columns: 1fr; height: auto; padding: 8px 16px 20px; }
+    header { padding: 14px 16px 4px; }
+    .chat { height: 70vh; }
+  }
+</style>
+</head>
+<body class="en-espera">
+<header>
+  <h1>J.A.R.V.I.S.</h1><span class="sub">asistente personal</span><span class="clock" id="clock"></span>
+</header>
+<main>
+  <section class="left">
+    <div class="reactor" aria-hidden="true">
+      <svg viewBox="0 0 200 200">
+        <circle class="ring r4" cx="100" cy="100" r="92"/>
+        <circle class="ring r1" cx="100" cy="100" r="82"/>
+        <circle class="ring r2" cx="100" cy="100" r="66"/>
+        <circle class="ring r3" cx="100" cy="100" r="50"/>
+        <circle class="ring r1" cx="100" cy="100" r="44"/>
+        <circle class="core" cx="100" cy="100" r="30"/>
+      </svg>
+      <div class="state-label" id="state">en espera</div>
+    </div>
+    <div class="panel status" id="status"><h2>Sistemas</h2></div>
+    <div class="quick">
+      <button data-q="Dame el estado del PC">Estado del PC</button>
+      <button data-q="¿Cuánta batería tiene el teléfono?">Batería teléfono</button>
+      <button data-q="¿Cómo está el clima?">Clima</button>
+      <button data-q="¿Qué rutinas tengo?">Mis rutinas</button>
+      <button data-q="Ayúdame a configurar mi OnePlus 15 para usarlo contigo">Configurar teléfono</button>
+    </div>
+  </section>
+  <section class="panel chat">
+    <h2>Conversación</h2>
+    <div class="log" id="log"></div>
+    <form class="send" id="form">
+      <input id="input" autocomplete="off" placeholder="Escriba una orden o pulse el micrófono…">
+      <button type="button" class="mic" id="mic" title="Dictar">Mic</button>
+      <button type="submit">Enviar</button>
+    </form>
+  </section>
+</main>
+<script>
+const $ = (s) => document.querySelector(s);
+const logEl = $("#log");
+let last = 0;
+const canalName = { voz: "voz", telegram: "telegram", panel: "panel", alexa: "alexa", rutina: "rutina", consola: "consola" };
+
+function add(ev) {
+  if (ev.tipo === "usuario" || ev.tipo === "jarvis") {
+    const d = document.createElement("div");
+    d.className = "msg " + ev.tipo;
+    const who = ev.tipo === "usuario" ? "Usted" : "Jarvis";
+    d.innerHTML = `<span class="meta"></span>`;
+    d.querySelector(".meta").textContent = `${who} · ${canalName[ev.canal] || ev.canal}`;
+    d.appendChild(document.createTextNode(ev.texto));
+    logEl.appendChild(d);
+  } else if (ev.tipo === "herramienta" || ev.tipo === "sistema" || ev.tipo === "error") {
+    const d = document.createElement("div");
+    d.className = "sys" + (ev.tipo === "error" ? " err" : "");
+    d.textContent = (ev.tipo === "herramienta" ? "› " : "") + ev.texto;
+    logEl.appendChild(d);
+  } else { return; }
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+function setState(s) {
+  document.body.className = s.replace(/\s+/g, "-");
+  $("#state").textContent = s;
+}
+
+async function poll() {
+  try {
+    const r = await fetch(`/api/eventos?desde=${last}`);
+    const j = await r.json();
+    for (const ev of j.eventos) { last = Math.max(last, ev.id); add(ev); }
+    setState(j.estado);
+  } catch (e) { setState("sin conexión"); }
+  setTimeout(poll, 800);
+}
+
+async function status() {
+  try {
+    const j = await (await fetch("/api/estado")).json();
+    const el = $("#status");
+    el.innerHTML = "<h2>Sistemas</h2>";
+    for (const item of j.sistemas) {
+      const d = document.createElement("div");
+      d.className = "st";
+      d.innerHTML = `<span class="dot ${item.nivel}"></span><div><span></span><small></small></div>`;
+      d.querySelector("span:not(.dot)").textContent = item.nombre;
+      d.querySelector("small").textContent = item.detalle;
+      el.appendChild(d);
+    }
+  } catch (e) {}
+  setTimeout(status, 10000);
+}
+
+async function send(text) {
+  text = text.trim();
+  if (!text) return;
+  $("#input").value = "";
+  setState("pensando");
+  try {
+    await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json", "X-Jarvis": "1" },
+                               body: JSON.stringify({ texto: text }) });
+  } catch (e) { add({ tipo: "error", texto: "No pude contactar a Jarvis." }); }
+}
+
+$("#form").addEventListener("submit", (e) => { e.preventDefault(); send($("#input").value); });
+document.querySelectorAll(".quick button").forEach((b) => b.addEventListener("click", () => send(b.dataset.q)));
+
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const mic = $("#mic");
+if (!SR) { mic.title = "Este navegador no permite dictado; use Chrome o Edge"; mic.disabled = true; mic.style.opacity = .4; }
+else {
+  const rec = new SR(); rec.lang = "es-CL"; rec.interimResults = false; rec.maxAlternatives = 1;
+  rec.onresult = (e) => send(e.results[0][0].transcript);
+  rec.onend = () => mic.classList.remove("rec");
+  rec.onerror = () => mic.classList.remove("rec");
+  mic.addEventListener("click", () => { mic.classList.add("rec"); setState("escuchando"); rec.start(); });
+}
+
+function tick() { $("#clock").textContent = new Date().toLocaleString("es-CL", { weekday: "long", hour: "2-digit", minute: "2-digit", second: "2-digit" }); }
+setInterval(tick, 1000); tick();
+poll(); status();
+</script>
+</body>
+</html>

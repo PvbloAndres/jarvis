@@ -1,0 +1,23 @@
+[
+  {
+    "trigger": "Jarvis modo trabajo",
+    "command": "RUTA_JARVIS\\orden.bat activa la rutina modo trabajo",
+    "ground": "background",
+    "voice": "modo trabajo",
+    "allowParams": "false"
+  },
+  {
+    "trigger": "Jarvis buenas noches",
+    "command": "RUTA_JARVIS\\orden.bat activa la rutina buenas noches",
+    "ground": "background",
+    "voice": "buenas noches",
+    "allowParams": "false"
+  },
+  {
+    "trigger": "Jarvis estado",
+    "command": "RUTA_JARVIS\\orden.bat dame un resumen corto del estado del PC y la bateria del telefono",
+    "ground": "background",
+    "voice": "estado del sistema",
+    "allowParams": "false"
+  }
+]

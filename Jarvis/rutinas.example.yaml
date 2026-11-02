@@ -1,0 +1,58 @@
+# =====================================================================
+#  Rutinas de Jarvis
+#  Cada rutina es una lista de pasos. Un paso puede ser:
+#    - herramienta: <nombre>   + args: {...}
+#    - decir: "texto"
+#  Se activan diciendo, por ejemplo: "Jarvis, modo trabajo".
+#  Si añades horario (HH:MM) y dias, se ejecutan solas.
+#  Herramientas útiles: pc_abrir, pc_abrir_web, pc_volumen, pc_multimedia, pc_bloquear, pc_modo_oscuro,
+#  tel_no_molestar, tel_volumen, tel_abrir_app, tel_brillo, tel_ahorro_bateria,
+#  alexa_rutina, alexa_anunciar, clima, hora_y_fecha, enviar_al_telefono
+#  (las tel_* necesitan el teléfono activado y las alexa_* necesitan Alexa activada en config.yaml)
+# =====================================================================
+
+rutinas:
+  modo_trabajo:
+    descripcion: "Abre las herramientas de trabajo, silencia el teléfono y enciende la luz del escritorio"
+    pasos:
+      - herramienta: pc_abrir
+        args: {nombre: "Visual Studio Code"}
+      - herramienta: pc_abrir_web
+        args: {url: "https://mail.google.com"}
+      - herramienta: tel_no_molestar
+        args: {activar: true}
+      - herramienta: alexa_rutina
+        args: {nombre: "luces_encender"}
+      - decir: "Modo trabajo activado."
+
+  modo_cine:
+    descripcion: "Pausa la música del PC, apaga las luces y silencia el teléfono"
+    pasos:
+      - herramienta: pc_multimedia
+        args: {accion: "play_pausa"}
+      - herramienta: alexa_rutina
+        args: {nombre: "luces_apagar"}
+      - herramienta: tel_volumen
+        args: {accion: "silenciar", tipo: "timbre"}
+      - decir: "Disfrute la película."
+
+  buenas_noches:
+    descripcion: "Apaga las luces, activa no molestar en el teléfono y bloquea el PC"
+    pasos:
+      - herramienta: alexa_rutina
+        args: {nombre: "luces_apagar"}
+      - herramienta: tel_no_molestar
+        args: {activar: true}
+      - herramienta: pc_bloquear
+      - decir: "Buenas noches. Que descanse."
+
+  buenos_dias:
+    descripcion: "Quita no molestar y da el clima del día"
+    horario: "07:30"              # se ejecuta sola a esta hora
+    dias: [lun, mar, mie, jue, vie]
+    anunciar_en: [pc, telegram]   # dónde decir el resumen: pc, telegram, alexa
+    pasos:
+      - herramienta: tel_no_molestar
+        args: {activar: false}
+      - herramienta: clima
+      - decir: "Buenos días. Sistemas en línea."
